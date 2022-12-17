@@ -136,4 +136,5 @@ run.sh
 saved
 pretrained_ckpt
 version.py
+data
 *.swp
