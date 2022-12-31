@@ -11,6 +11,7 @@ import torch
 
 from main_fer2013 import get_dataset, get_model
 from trainers.tta_trainer import FER2013Trainer
+from utils.datasets.fer2013dataset import fer2013
 
 seed = 1234
 random.seed(seed)
@@ -64,6 +65,15 @@ def main(config_path, checkpoint):
 
     # calculate acc on test dataset with tta
     trainer._calc_acc_on_private_test_with_tta()
+
+    # to calculate acc without tta, first we need
+    # test set without tta
+    test_set_without_tta = fer2013("test", configs, tta=False)
+
+    # initialize trainer with test set without tta
+    trainer = FER2013Trainer(model, train_set, val_set, test_set_without_tta, configs)
+
+    trainer._model.load_state_dict(state["net"])
 
     # calculate acc on test dataset without tta
     trainer._calc_acc_on_private_test()
