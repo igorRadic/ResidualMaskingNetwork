@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import sys
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -22,12 +23,14 @@ np.random.seed(seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-
-# this checkpoint must be located in ./saved/checkpoints
-checkpoint_filename = "resmasking_dropout1_rot30_2019Nov17_14.33"
-# for testing some other model, make apropriate config file and
-# locate it in ./configs directory, also forward it's name and
-# checkpoint's name to main function in this module
+# call this module like this: python fer2013_test.py <config_path> <checkpoint_filename>
+try:
+    config_path = sys.argv[1]
+    checkpoint_filename = sys.argv[2]
+except:
+    config_path = "./configs/fer2013_ResMaskingNet_74.14_test_acc_config.json"
+    # this checkpoint must be located in ./saved/checkpoints
+    checkpoint_filename = "resmasking_dropout1_rot30_2019Nov17_14.33"
 
 
 def main(config_path, checkpoint):
@@ -80,7 +83,4 @@ def main(config_path, checkpoint):
 
 
 if __name__ == "__main__":
-    main(
-        config_path="./configs/fer2013_ResMaskingNet_74.14_test_acc_config.json",
-        checkpoint=checkpoint_filename,
-    )
+    main(config_path=config_path, checkpoint=checkpoint_filename)
