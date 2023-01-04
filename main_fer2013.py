@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import sys
 import warnings
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
@@ -23,6 +24,12 @@ torch.backends.cudnn.benchmark = False
 import models
 from models import segmentation
 
+# call this module like this: python main_fer2013.py <config_path>
+try:
+    config_path = sys.argv[1]
+except:
+    config_path = "./configs/fer2013_config.json"
+
 
 def main(config_path):
     """
@@ -30,7 +37,7 @@ def main(config_path):
 
     Parameters:
     -----------
-    config_path : srt
+    config_path : str
         path to config file
     """
     # load configs and set random seed
@@ -85,4 +92,4 @@ def get_dataset(configs):
 
 
 if __name__ == "__main__":
-    main("./configs/fer2013_config.json")
+    main(config_path=config_path)
