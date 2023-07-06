@@ -25,11 +25,6 @@ model_dict = [
 ]
 
 
-# model_dict_proba_list = list(map(list, product([0, 1], repeat=len(model_dict))))
-
-model_dict_proba_list = [[1, 1, 1, 1, 1, 1, 1]]
-
-
 def main():
     test_results_list = []
     for model_name, checkpoint_path in model_dict:

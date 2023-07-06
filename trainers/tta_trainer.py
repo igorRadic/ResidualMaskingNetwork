@@ -1,6 +1,7 @@
 """this class build and run a trainer by a configuration"""
 import datetime
 import os
+import time
 import traceback
 
 import numpy as np
@@ -257,6 +258,7 @@ class FER2013Trainer(Trainer):
     def _calc_acc_on_private_test(self):
         self._model.eval()
         test_acc = 0.0
+        prediction_time = 0
         print("Calc acc on private test..")
         f = open("private_test_log.txt", "w")
         with torch.no_grad():
@@ -267,20 +269,26 @@ class FER2013Trainer(Trainer):
                 images = images.cuda(non_blocking=True)
                 targets = targets.cuda(non_blocking=True)
 
+                start_time = time.perf_counter()
                 outputs = self._model(images)
-                # print(outputs.shape, outputs)
+                end_time = time.perf_counter()
+                execution_time = end_time - start_time
+                prediction_time += execution_time
+
                 acc = accuracy(outputs, targets)[0]
                 test_acc += acc.item()
                 f.writelines("{}_{}\n".format(i, acc.item()))
 
             test_acc = test_acc / (i + 1)
         print("Accuracy on private test: {:.3f}".format(test_acc))
+        print("Prediction time: " + str(prediction_time))
         f.close()
         return test_acc
 
     def _calc_acc_on_private_test_with_tta(self):
         self._model.eval()
         test_acc = 0.0
+        prediction_time = 0
         print("Calc acc on private test with tta..")
         f = open(
             "private_test_log_{}_{}.txt".format(
@@ -300,9 +308,12 @@ class FER2013Trainer(Trainer):
                 images = images.cuda(non_blocking=True)
                 targets = targets.cuda(non_blocking=True)
 
+                start_time = time.perf_counter()
                 outputs = self._model(images)
                 outputs = F.softmax(outputs, 1)
-
+                end_time = time.perf_counter()
+                execution_time = end_time - start_time
+                prediction_time += execution_time                
                 # outputs.shape [tta_size, 7]
                 outputs = torch.sum(outputs, 0)
 
@@ -315,6 +326,7 @@ class FER2013Trainer(Trainer):
 
             test_acc = test_acc / (idx + 1)
         print("Accuracy on private test with tta: {:.3f}".format(test_acc))
+        print("Prediction time: " + str(prediction_time))
         f.close()
         return test_acc
 

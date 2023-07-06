@@ -6,6 +6,8 @@ import imgaug
 import numpy as np
 import torch
 
+import time
+
 seed = 1234
 random.seed(seed)
 imgaug.seed(seed)
@@ -39,6 +41,8 @@ def main():
 
     test_set = fer2013("test", configs, tta=True, tta_size=8)
 
+    prediction_time = 0
+
     for model_name, checkpoint_path in model_dict:
         prediction_list = []  # each item is 7-ele array
 
@@ -70,8 +74,13 @@ def main():
                 images = make_batch(images)
                 images = images.cuda(non_blocking=True)
 
+                start_time = time.perf_counter()
                 outputs = model(images).cpu()
                 outputs = F.softmax(outputs, 1)
+                end_time = time.perf_counter()
+                execution_time = end_time - start_time
+                prediction_time += execution_time
+
                 outputs = torch.sum(outputs, 0)  # outputs.shape [tta_size, 7]
 
                 outputs = [round(o, 4) for o in outputs.numpy()]
@@ -83,6 +92,8 @@ def main():
             targets_saved = True
 
         np.save("./saved/results/{}.npy".format(checkpoint_path), prediction_list)
+
+        print("Prediction time: " + str(prediction_time))
 
 
 if __name__ == "__main__":
